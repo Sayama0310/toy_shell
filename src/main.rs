@@ -1,11 +1,11 @@
-use std::process;
 use crate::command::Command;
 use crate::core::ShellCore;
 use crate::feeder::Feeder;
+use std::process;
 
 mod command;
-mod feeder;
 mod core;
+mod feeder;
 
 fn main() {
     let feeder = Feeder::new();

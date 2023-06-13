@@ -1,6 +1,6 @@
+use crate::core::ShellCore;
 use std::io;
 use std::io::Write;
-use crate::core::ShellCore;
 
 pub struct Feeder {}
 
