@@ -8,7 +8,7 @@ mod feeder;
 mod core;
 
 fn main() {
-    let mut feeder = Feeder::new();
+    let feeder = Feeder::new();
     let mut core = ShellCore::new();
     loop {
         match feeder.feed_line(&core) {
