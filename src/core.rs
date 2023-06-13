@@ -3,6 +3,12 @@ pub struct ShellCore {
 }
 
 impl ShellCore {
+    pub(crate) fn set_status(&mut self, status: i32) {
+        self.pre_status = status;
+    }
+}
+
+impl ShellCore {
     pub(crate) fn new() -> ShellCore {
         ShellCore { pre_status: 0 }
     }
