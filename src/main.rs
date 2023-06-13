@@ -14,7 +14,7 @@ fn main() {
         match feeder.feed_line(&core) {
             Ok(command) => {
                 let command = Command::parse(command, &core);
-                command.exec(&mut core);
+                core.exec(&command);
             }
             Err(_) => {
                 process::exit(1);
