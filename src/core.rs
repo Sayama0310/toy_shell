@@ -1,7 +1,9 @@
-pub struct ShellCore {}
+pub struct ShellCore {
+    pub pre_status: i32,
+}
 
 impl ShellCore {
     pub(crate) fn new() -> ShellCore {
-        todo!()
+        ShellCore { pre_status: 0 }
     }
 }
