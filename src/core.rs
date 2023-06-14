@@ -4,10 +4,18 @@ use nix::sys::wait;
 use nix::sys::wait::WaitStatus;
 use nix::unistd;
 use nix::unistd::ForkResult;
+use std::collections::HashMap;
 use std::process;
 
+mod builtins;
+
 pub struct ShellCore {
+    // The status of the previous command.
     pub pre_status: i32,
+    // built-in commands
+    pub builtins: HashMap<String, fn(&mut ShellCore, &Vec<String>) -> i32>,
+    // environment variables
+    pub vars: HashMap<String, String>,
 }
 
 impl ShellCore {
@@ -16,8 +24,11 @@ impl ShellCore {
     }
 
     pub(crate) fn exec(&mut self, command: &Command) {
+        if self.run_builtin(command) {
+            return;
+        }
         match unsafe { unistd::fork() } {
-            Ok(ForkResult::Child) => match unistd::execvp(&command.name, &command.args) {
+            Ok(ForkResult::Child) => match unistd::execvp(&command.name, &command.cargs) {
                 Err(Errno::EACCES) => {
                     println!("{}: Permission denied", &command.name.to_str().unwrap());
                     process::exit(126)
@@ -52,10 +63,30 @@ impl ShellCore {
             Err(err) => panic!("Failed to fork. {}", err),
         }
     }
+
+    fn run_builtin(&mut self, command: &Command) -> bool {
+        let name = command.name.to_str().expect("Conversion to &str failed.");
+        if !self.builtins.contains_key(name) {
+            return false;
+        }
+
+        let func = self.builtins[name];
+        let status = func(self, &command.args);
+        self.set_status(status);
+        true
+    }
 }
 
 impl ShellCore {
     pub(crate) fn new() -> ShellCore {
-        ShellCore { pre_status: 0 }
+        let mut core = ShellCore {
+            pre_status: 0,
+            builtins: HashMap::new(),
+            vars: HashMap::new(),
+        };
+        // Setting up the processing of the built-in commands.
+        core.builtins.insert("exit".to_string(), builtins::exit);
+
+        core
     }
 }
