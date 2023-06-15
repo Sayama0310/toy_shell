@@ -1,29 +1,50 @@
 use crate::core::ShellCore;
-use std::io;
-use std::io::Write;
+use rustyline::history::DefaultHistory;
+use rustyline::Editor;
 
-pub struct Feeder {}
+const HISTORY_FILE: &str = ".toysh_history";
 
-impl Feeder {
-    pub(crate) fn feed_line(&self, core: &ShellCore) -> Result<String, ()> {
+pub struct Feeder<I: rustyline::history::History> {
+    cli_editor: Editor<(), I>,
+}
+
+impl<I: rustyline::history::History> Feeder<I> {
+    pub(crate) fn feed_line(&mut self, core: &ShellCore) -> Result<String, ()> {
         // Set the prompt:
         // If the previous execution result is 0, set it to 😊
         // If the previous execution result is non-zero, set it to 😇
         let face = if core.pre_status == 0 { "😊" } else { "😇" };
         let prompt = format!("ToySh {} > ", face);
-        print!("{}", prompt);
-        io::stdout().flush().expect("Failed to flush stdout");
-        // Read a line from stdin:
-        let mut input = String::new();
-        match io::stdin().read_line(&mut input) {
-            Ok(_) => Ok(input),
-            Err(_) => Err(()),
+        // Read the input from the user
+        loop {
+            match self.cli_editor.readline(prompt.as_str()) {
+                Ok(line) => {
+                    let line_trimmed = line.trim();
+                    if line_trimmed.is_empty() {
+                        // If the input is empty, continue the loop
+                        continue;
+                    } else {
+                        // Add the input to the history file
+                        self.cli_editor.add_history_entry(line_trimmed).unwrap();
+                        return Ok(line_trimmed.to_string());
+                    }
+                }
+                Err(_) => {
+                    return Err(());
+                }
+            }
         }
     }
 }
 
-impl Feeder {
-    pub(crate) fn new() -> Feeder {
-        Feeder {}
+impl<I: rustyline::history::History> Feeder<I> {
+    pub(crate) fn new() -> Feeder<DefaultHistory> {
+        let mut cli_editor = Editor::<(), DefaultHistory>::new().unwrap();
+        let home = dirs::home_dir().unwrap();
+        let history_file_path = home.join(HISTORY_FILE);
+        if let Err(e) = cli_editor.load_history(history_file_path.as_path()) {
+            eprintln!("ToySh: Failed to load history file: {e}");
+        }
+        Feeder { cli_editor }
     }
 }
