@@ -1,4 +1,5 @@
 use crate::core::ShellCore;
+use rustyline::error::ReadlineError;
 use rustyline::history::DefaultHistory;
 use rustyline::Editor;
 
@@ -9,7 +10,7 @@ pub struct Feeder<I: rustyline::history::History> {
 }
 
 impl<I: rustyline::history::History> Feeder<I> {
-    pub(crate) fn feed_line(&mut self, core: &ShellCore) -> Result<String, ()> {
+    pub(crate) fn feed_line(&mut self, core: &ShellCore) -> Result<String, ReadlineError> {
         // Set the prompt:
         // If the previous execution result is 0, set it to 😊
         // If the previous execution result is non-zero, set it to 😇
@@ -29,8 +30,8 @@ impl<I: rustyline::history::History> Feeder<I> {
                         return Ok(line_trimmed.to_string());
                     }
                 }
-                Err(_) => {
-                    return Err(());
+                Err(err) => {
+                    return Err(err);
                 }
             }
         }
