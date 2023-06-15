@@ -86,6 +86,7 @@ impl ShellCore {
         };
         // Setting up the processing of the built-in commands.
         core.builtins.insert("exit".to_string(), builtins::exit);
+        core.builtins.insert("cd".to_string(), builtins::cd);
 
         core
     }
