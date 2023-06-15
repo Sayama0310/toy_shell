@@ -3,8 +3,6 @@ use rustyline::error::ReadlineError;
 use rustyline::history::DefaultHistory;
 use rustyline::Editor;
 
-const HISTORY_FILE: &str = ".toysh_history";
-
 pub struct Feeder<I: rustyline::history::History> {
     cli_editor: Editor<(), I>,
 }
@@ -39,10 +37,14 @@ impl<I: rustyline::history::History> Feeder<I> {
 }
 
 impl<I: rustyline::history::History> Feeder<I> {
-    pub(crate) fn new() -> Feeder<DefaultHistory> {
-        let mut cli_editor = Editor::<(), DefaultHistory>::new().unwrap();
+    pub(crate) fn new(core: &ShellCore) -> Feeder<DefaultHistory> {
+        // Get the path to the history file
         let home = dirs::home_dir().unwrap();
-        let history_file_path = home.join(HISTORY_FILE);
+        let toysh_home = core.vars.get("TOYSH_HOME").unwrap();
+        let history_file = core.vars.get("HISTORY_FILE").unwrap();
+        let history_file_path = home.join(toysh_home).join(history_file);
+        // Create the CLI editor
+        let mut cli_editor = Editor::<(), DefaultHistory>::new().unwrap();
         if let Err(e) = cli_editor.load_history(history_file_path.as_path()) {
             eprintln!("ToySh: Failed to load history file: {e}");
         }

@@ -9,8 +9,8 @@ mod core;
 mod feeder;
 
 fn main() {
-    let mut feeder = Feeder::<DefaultHistory>::new();
     let mut core = ShellCore::new();
+    let mut feeder = Feeder::<DefaultHistory>::new(&core);
     loop {
         match feeder.feed_line(&core) {
             Ok(command) => {

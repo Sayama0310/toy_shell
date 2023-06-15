@@ -88,6 +88,16 @@ impl ShellCore {
         core.builtins.insert("exit".to_string(), builtins::exit);
         core.builtins.insert("cd".to_string(), builtins::cd);
 
+        // Setting up the environment variables.
+        core.setting_vars();
+
         core
+    }
+
+    fn setting_vars(&mut self) {
+        self.vars
+            .insert("TOYSH_HOME".to_string(), ".toysh".to_string());
+        self.vars
+            .insert("HISTORY_FILE".to_string(), "history".to_string());
     }
 }
