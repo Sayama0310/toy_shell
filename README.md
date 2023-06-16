@@ -24,6 +24,28 @@ ToySh 😊 > pwd
 ToySh 😊 > exit
 ```
 
+## Features
+
+### Command History
+
+ToySh has a command history feature that allows you to access the commands you have executed.
+
+When ToySh starts, a file named `.toysh/history` is created under your home directory. If you no longer need it, please
+delete it.
+
+### Built-in Commands
+
+ToySh has the following built-in commands:
+
+- `cd` : Change directory.
+  - `cd` : No argument is specified, change to the home directory.
+  - `cd -` : Change to the previous directory.
+  - `cd <dir>` : Change to the specified directory.
+
+- `exit` : Exit ToySh.
+  - `exit` : Exit ToySh with status code 0.
+  - `exit <status>` : Exit ToySh with the specified status code.
+
 ## Development Environment
 
 - OS: macOS Ventura 13.4
