@@ -40,12 +40,23 @@ impl<I: rustyline::history::History> Feeder<I> {
     pub(crate) fn new(core: &ShellCore) -> Feeder<DefaultHistory> {
         // Get the path to the history file
         let home = dirs::home_dir().unwrap();
-        let toysh_home = core.vars.get("TOYSH_HOME").unwrap();
-        let history_file = core.vars.get("HISTORY_FILE").unwrap();
-        let history_file_path = home.join(toysh_home).join(history_file);
+        let toysh_home = home.join(core.vars.get("TOYSH_HOME").unwrap());
+        // If the toysh home directory does not exist, create it
+        if !toysh_home.exists() {
+            if let Err(e) = std::fs::create_dir(toysh_home.as_path()) {
+                eprintln!("ToySh: Failed to create toysh home directory: {e}");
+            }
+        }
+        let history_file = toysh_home.join(core.vars.get("HISTORY_FILE").unwrap());
+        // If the history file does not exist, create it
+        if !history_file.exists() {
+            if let Err(e) = std::fs::File::create(history_file.as_path()) {
+                eprintln!("ToySh: Failed to create history file: {e}");
+            }
+        }
         // Create the CLI editor
         let mut cli_editor = Editor::<(), DefaultHistory>::new().unwrap();
-        if let Err(e) = cli_editor.load_history(history_file_path.as_path()) {
+        if let Err(e) = cli_editor.load_history(history_file.as_path()) {
             eprintln!("ToySh: Failed to load history file: {e}");
         }
         Feeder { cli_editor }
