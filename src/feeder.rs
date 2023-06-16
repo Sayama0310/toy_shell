@@ -9,11 +9,7 @@ pub struct Feeder<I: rustyline::history::History> {
 
 impl<I: rustyline::history::History> Feeder<I> {
     pub(crate) fn feed_line(&mut self, core: &ShellCore) -> Result<String, ReadlineError> {
-        // Set the prompt:
-        // If the previous execution result is 0, set it to 😊
-        // If the previous execution result is non-zero, set it to 😇
-        let face = if core.pre_status == 0 { "😊" } else { "😇" };
-        let prompt = format!("ToySh {} > ", face);
+        let prompt = self.generate_prompt(core);
         // Read the input from the user
         loop {
             match self.cli_editor.readline(prompt.as_str()) {
@@ -60,5 +56,13 @@ impl<I: rustyline::history::History> Feeder<I> {
             eprintln!("ToySh: Failed to load history file: {e}");
         }
         Feeder { cli_editor }
+    }
+
+    fn generate_prompt(&self, core: &ShellCore) -> String {
+        // Set the prompt:
+        // If the previous execution result is 0, set it to 😊
+        // If the previous execution result is non-zero, set it to 😇
+        let face = if core.pre_status == 0 { "😊" } else { "😇" };
+        format!("ToySh {} > ", face)
     }
 }
