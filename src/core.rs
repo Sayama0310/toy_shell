@@ -9,11 +9,13 @@ use std::process;
 
 mod builtins;
 
+type Builtin = fn(&mut ShellCore, &Vec<String>) -> i32;
+
 pub struct ShellCore {
     // The status of the previous command.
     pub pre_status: i32,
     // built-in commands
-    pub builtins: HashMap<String, fn(&mut ShellCore, &Vec<String>) -> i32>,
+    builtins: HashMap<String, Builtin>,
     // environment variables
     pub vars: HashMap<String, String>,
 }
