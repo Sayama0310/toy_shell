@@ -1,10 +1,9 @@
-use crate::command::Command;
+use crate::core::script::Script;
 use crate::core::ShellCore;
 use crate::feeder::Feeder;
 use rustyline::history::DefaultHistory;
 use std::process;
 
-mod command;
 mod core;
 mod feeder;
 
@@ -14,8 +13,8 @@ fn main() {
     loop {
         match feeder.feed_line(&core) {
             Ok(command) => {
-                let command = Command::parse(command, &core);
-                core.exec(&command);
+                let mut script = Script::parse(&command, &mut core).unwrap();
+                script.exec(&mut core);
             }
             Err(_) => {
                 process::exit(1);
