@@ -19,7 +19,7 @@ pub fn exit(_core: &mut ShellCore, args: &Vec<String>) -> i32 {
 pub fn cd(core: &mut ShellCore, args: &Vec<String>) -> i32 {
     // If arguments are more than 2, print error message
     if args.len() > 3 {
-        eprintln!("{}", "cd: too many arguments");
+        eprintln!("cd: too many arguments");
         return 1;
     }
     let mut path = PathBuf::new();
