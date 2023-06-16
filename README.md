@@ -9,6 +9,21 @@ List of basic features:
 - Execution of foreground/background jobs.
 - Command history functionality.
 
+## Usage
+
+When you run the `cargo run` command, ToySh will start, and you will have access to a basic shell.
+
+Below is a sample execution:
+
+```shell
+$ cargo run
+ToySh 😊 > ls
+Cargo.lock      Cargo.toml      LICENSE         README.md       src             target
+ToySh 😊 > pwd
+/path/to/toy_shell
+ToySh 😊 > exit
+```
+
 ## Development Environment
 
 - OS: macOS Ventura 13.4
