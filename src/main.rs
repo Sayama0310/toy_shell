@@ -25,6 +25,10 @@ fn main() {
                 // If Ctrl-C is pressed, continue the loop.
                 continue;
             }
+            Err(ReadlineError::Eof) => {
+                // If Ctrl-D is pressed, exit the shell with previous status.
+                process::exit(core.pre_status);
+            }
             Err(_) => {
                 // TODO: Handle error
                 eprintln!("Error");

@@ -2,9 +2,9 @@ use crate::core::ShellCore;
 use std::path::PathBuf;
 use std::{env, fs, process};
 
-pub fn exit(_core: &mut ShellCore, args: &Vec<String>) -> i32 {
+pub fn exit(core: &mut ShellCore, args: &Vec<String>) -> i32 {
     if args.len() == 1 {
-        process::exit(0);
+        process::exit(core.pre_status);
     }
     let exit_status = match args[1].clone().parse::<i32>() {
         Ok(n) => n % 256,
