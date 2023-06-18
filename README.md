@@ -76,3 +76,15 @@ I'm developing and testing in the following environment:
 - Cargo: cargo 1.68.2 (6feb7c9cf 2023-03-26)
 - pre-commit: pre-commit 3.3.3 (optional)
 - Ruby: ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-darwin22] (optional for use in pre-commit hook)
+
+## References
+
+### Books
+
+- [ゼロから学ぶRust システムプログラミングの基礎から線形型システムまで](https://bookclub.kodansha.co.jp/product?item=0000371815)
+- [システムプログラミング入門 実行しながら理解するLinux OSのしくみ](https://www.morikita.co.jp/books/mid/085551)
+- [Software Design (ソフトウェアデザイン) 2022年12月号 ~ 【連載】魅惑の自作シェルの世界](https://www.fujisan.co.jp/product/1535/b/2323826/)
+
+### Articles
+
+- [execvp() never finishes on pipe](https://stackoverflow.com/questions/28228744/execvp-never-finishes-on-pipe)
