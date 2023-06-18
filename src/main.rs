@@ -14,7 +14,6 @@ fn main() {
     ignore_signals();
     let mut core = ShellCore::new();
     let mut feeder = Feeder::<DefaultHistory>::new(&core);
-    #[allow(clippy::while_let_loop)]
     loop {
         match feeder.feed_line(&core) {
             Ok(command) => {
