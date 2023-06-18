@@ -45,8 +45,8 @@ $ echo $?  # Check the exit status of ToySh.
 
 ToySh has a command history feature that allows you to access the commands you have executed.
 
-When ToySh starts, a file named `.toysh/history` is created under your home directory. If you no longer need it, please
-delete it.
+When ToySh starts, a file named `.toysh/history` is created under your home directory.  
+**If you no longer need it, please delete it.** 🔥
 
 ### Built-in Commands
 
@@ -68,6 +68,8 @@ You can use the pipe operator `|` to connect the standard output of one command 
 command.
 
 ## Development Environment
+
+I'm developing and testing in the following environment:
 
 - OS: macOS Ventura 13.4
 - Rust: rustc 1.68.2 (9eb3afe9e 2023-03-27)
