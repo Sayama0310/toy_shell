@@ -33,15 +33,15 @@ impl Command {
                 unistd::dup2(wfd, libc::STDOUT_FILENO).unwrap();
                 match unistd::execvp(&self.name, &self.cargs) {
                     Err(Errno::EACCES) => {
-                        println!("{}: Permission denied", self.name.to_str().unwrap());
+                        eprintln!("{}: Permission denied", self.name.to_str().unwrap());
                         process::exit(126)
                     }
                     Err(Errno::ENOENT) => {
-                        println!("{}: command not found", self.name.to_str().unwrap());
+                        eprintln!("{}: command not found", self.name.to_str().unwrap());
                         process::exit(127)
                     }
                     Err(err) => {
-                        println!("Failed to execute. {:?}", err);
+                        eprintln!("Failed to execute. {:?}", err);
                         process::exit(127)
                     }
                     _ => (),
