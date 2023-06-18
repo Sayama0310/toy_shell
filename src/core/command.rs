@@ -6,6 +6,7 @@
 // <pipe> ::= "|"
 
 use crate::core::ShellCore;
+use crate::reset_signals;
 use nix::errno::Errno;
 use nix::sys::wait;
 use nix::sys::wait::WaitStatus;
@@ -28,6 +29,7 @@ impl Command {
         }
         match unsafe { unistd::fork() } {
             Ok(ForkResult::Child) => {
+                reset_signals();
                 // Set STDIN and STDOUT to rfd and wfd, respectively.
                 unistd::dup2(rfd, libc::STDIN_FILENO).unwrap();
                 unistd::dup2(wfd, libc::STDOUT_FILENO).unwrap();

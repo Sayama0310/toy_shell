@@ -43,3 +43,9 @@ pub fn ignore_signals() {
         signal::signal(Signal::SIGINT, SigHandler::SigIgn).unwrap();
     }
 }
+
+pub fn reset_signals() {
+    unsafe {
+        signal::signal(Signal::SIGINT, SigHandler::SigDfl).unwrap();
+    }
+}
