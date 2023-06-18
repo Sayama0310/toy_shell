@@ -16,12 +16,21 @@ When you run the `cargo run` command, ToySh will start, and you will have access
 Below is a sample execution:
 
 ```shell
-$ cargo run
+$ cargo run  # Start ToySh.
 ToySh 😊 > ls
 Cargo.lock      Cargo.toml      LICENSE         README.md       src             target
+ToySh 😊 > ls -la | cat -n | grep .git
+     4  drwxr-xr-x@ 14 sayama_yusei  staff    448 Jun 18 15:59 .git
+     5  -rw-r--r--@  1 sayama_yusei  staff     15 Jun 14 05:30 .gitignore
 ToySh 😊 > pwd
 /path/to/toy_shell
-ToySh 😊 > exit
+ToySh 😇 > cd src
+ToySh 😊 > pwd
+/path/to/toy_shell/src
+ToySh 😊 > exit 2
+
+$ echo $?  # Check the exit status of ToySh.
+2
 ```
 
 ## Features
@@ -38,13 +47,19 @@ delete it.
 ToySh has the following built-in commands:
 
 - `cd` : Change directory.
-  - `cd` : No argument is specified, change to the home directory.
-  - `cd -` : Change to the previous directory.
-  - `cd <dir>` : Change to the specified directory.
+    - `cd` : No argument is specified, change to the home directory.
+    - `cd -` : Change to the previous directory.
+    - `cd <dir>` : Change to the specified directory.
 
 - `exit` : Exit ToySh.
-  - `exit` : Exit ToySh with status code 0.
-  - `exit <status>` : Exit ToySh with the specified status code.
+    - `exit` : Exit ToySh with status code 0.
+    - `exit <status>` : Exit ToySh with the specified status code.
+
+### Pipeline
+
+ToySh supports pipelines.
+You can use the pipe operator `|` to connect the standard output of one command to the standard input of another
+command.
 
 ## Development Environment
 
