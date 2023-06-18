@@ -2,12 +2,14 @@
 
 Implemented a simple shell for learning purposes.
 
-List of basic features:
+List of basic features that I want to implement:
 
 - Receive commands from standard input and fork a child process to execute them.
 - Execution through pipelines.
-- Execution of foreground/background jobs.
-- Command history functionality.
+- Execution of foreground/background jobs. (Not started yet)
+- Command history functionality. (Partially completed)
+- Built-in commands. (Partially completed)
+- Signal handling. (Not started yet)
 
 ---
 
