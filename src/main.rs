@@ -26,17 +26,16 @@ fn main() {
             }
             Err(ReadlineError::Eof) => {
                 // If Ctrl-D is pressed, exit the shell with previous status.
+                feeder.save_history(&core);
                 process::exit(core.pre_status);
             }
             Err(_) => {
                 eprintln!("ToySh: Failed to read line.");
-                break;
+                feeder.save_history(&core);
+                process::exit(1);
             }
         }
     }
-    // FIXME: If process is finished by built-in exit command, history is not saved.
-    feeder.save_history(&core);
-    process::exit(1);
 }
 
 pub fn ignore_signals() {
