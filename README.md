@@ -17,17 +17,23 @@ Below is a sample execution:
 
 ```shell
 $ cargo run  # Start ToySh.
-ToySh 😊 > ls
+ToySh 😊 > ls  # Execute a command.
 Cargo.lock      Cargo.toml      LICENSE         README.md       src             target
-ToySh 😊 > ls -la | cat -n | grep .git
+ToySh 😊 > ls -a  # Execute a command with arguments.
+.                       .git                    .idea                   Cargo.lock              LICENSE                 src
+..                      .gitignore              .pre-commit-config.yaml Cargo.toml              README.md               target
+ToySh 😊 > ls -la | cat -n | grep .git  # Execute a pipeline.
      4  drwxr-xr-x@ 14 sayama_yusei  staff    448 Jun 18 15:59 .git
      5  -rw-r--r--@  1 sayama_yusei  staff     15 Jun 14 05:30 .gitignore
-ToySh 😊 > pwd
+ToySh 😊 > ls -3  # If the command fails, an angelic halo appears on the prompt.
+ls: invalid option -- 3
+usage: ls [-@ABCFGHILOPRSTUWabcdefghiklmnopqrstuvwxy1%,] [--color=when] [-D format] [file ...]
+ToySh 😇 > pwd
 /path/to/toy_shell
-ToySh 😇 > cd src
+ToySh 😊 > cd src  # Execute a built-in command.
 ToySh 😊 > pwd
 /path/to/toy_shell/src
-ToySh 😊 > exit 2
+ToySh 😊 > exit 2  # Execute a exit with status
 
 $ echo $?  # Check the exit status of ToySh.
 2
