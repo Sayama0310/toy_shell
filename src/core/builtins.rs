@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::{env, fs, process};
 
 pub fn exit(core: &mut ShellCore, args: &Vec<String>) -> i32 {
+    // TODO: save history
     if args.len() == 1 {
         process::exit(core.pre_status);
     }
