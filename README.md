@@ -9,6 +9,8 @@ List of basic features:
 - Execution of foreground/background jobs.
 - Command history functionality.
 
+---
+
 ## Usage
 
 When you run the `cargo run` command, ToySh will start, and you will have access to a basic shell.
@@ -39,6 +41,8 @@ $ echo $?  # Check the exit status of ToySh.
 2
 ```
 
+&nbsp;
+
 ## Features
 
 ### Command History
@@ -67,6 +71,8 @@ ToySh supports pipelines.
 You can use the pipe operator `|` to connect the standard output of one command to the standard input of another
 command.
 
+&nbsp;
+
 ## Development Environment
 
 I'm developing and testing in the following environment:
@@ -76,6 +82,8 @@ I'm developing and testing in the following environment:
 - Cargo: cargo 1.68.2 (6feb7c9cf 2023-03-26)
 - pre-commit: pre-commit 3.3.3 (optional)
 - Ruby: ruby 3.2.2 (2023-03-30 revision e51014f9c0) [x86_64-darwin22] (optional for use in pre-commit hook)
+
+&nbsp;
 
 ## References
 
