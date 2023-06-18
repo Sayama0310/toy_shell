@@ -2,6 +2,7 @@ use crate::core::ShellCore;
 use rustyline::error::ReadlineError;
 use rustyline::history::DefaultHistory;
 use rustyline::Editor;
+use std::path::PathBuf;
 
 pub struct Feeder<I: rustyline::history::History> {
     cli_editor: Editor<(), I>,
@@ -29,6 +30,23 @@ impl<I: rustyline::history::History> Feeder<I> {
                 }
             }
         }
+    }
+
+    pub(crate) fn save_history(&mut self, core: &ShellCore) {
+        if self
+            .cli_editor
+            .save_history(self.gen_history_file(core).as_path())
+            .is_err()
+        {
+            eprintln!("ToySh: Failed to save history file.");
+        }
+    }
+
+    fn gen_history_file(&self, core: &ShellCore) -> PathBuf {
+        let home = dirs::home_dir().unwrap();
+        let toysh_home = home.join(core.vars.get("TOYSH_HOME").unwrap());
+        let history_file = toysh_home.join(core.vars.get("HISTORY_FILE").unwrap());
+        history_file
     }
 }
 
