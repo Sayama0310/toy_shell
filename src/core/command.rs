@@ -9,9 +9,10 @@ use crate::core::ShellCore;
 use nix::errno::Errno;
 use nix::sys::wait;
 use nix::sys::wait::WaitStatus;
-use nix::unistd;
 use nix::unistd::ForkResult;
+use nix::{libc, unistd};
 use std::ffi::CString;
+use std::os::fd::RawFd;
 use std::process;
 
 pub(crate) struct Command {
@@ -21,29 +22,42 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn exec(&mut self, core: &mut ShellCore) {
+    pub(crate) fn exec(&self, rfd: RawFd, wfd: RawFd, core: &mut ShellCore) {
         if core.run_builtin(self) {
             return;
         }
         match unsafe { unistd::fork() } {
-            Ok(ForkResult::Child) => match unistd::execvp(&self.name, &self.cargs) {
-                Err(Errno::EACCES) => {
-                    println!("{}: Permission denied", self.name.to_str().unwrap());
-                    process::exit(126)
+            Ok(ForkResult::Child) => {
+                // Set STDIN and STDOUT to rfd and wfd, respectively.
+                unistd::dup2(rfd, libc::STDIN_FILENO).unwrap();
+                unistd::dup2(wfd, libc::STDOUT_FILENO).unwrap();
+                match unistd::execvp(&self.name, &self.cargs) {
+                    Err(Errno::EACCES) => {
+                        println!("{}: Permission denied", self.name.to_str().unwrap());
+                        process::exit(126)
+                    }
+                    Err(Errno::ENOENT) => {
+                        println!("{}: command not found", self.name.to_str().unwrap());
+                        process::exit(127)
+                    }
+                    Err(err) => {
+                        println!("Failed to execute. {:?}", err);
+                        process::exit(127)
+                    }
+                    _ => (),
                 }
-                Err(Errno::ENOENT) => {
-                    println!("{}: command not found", self.name.to_str().unwrap());
-                    process::exit(127)
-                }
-                Err(err) => {
-                    println!("Failed to execute. {:?}", err);
-                    process::exit(127)
-                }
-                _ => (),
-            },
+            }
             Ok(ForkResult::Parent { child }) => {
                 let exit_status = match wait::waitpid(child, None) {
-                    Ok(WaitStatus::Exited(_pid, status)) => status,
+                    Ok(WaitStatus::Exited(_pid, status)) => {
+                        // Close wfd.
+                        // Without this step, the subsequent command (such as `cat -n`) would not
+                        // know when to finish, resulting in an indefinite execution.
+                        if wfd != libc::STDOUT_FILENO {
+                            unistd::close(wfd).unwrap();
+                        }
+                        status
+                    }
                     Ok(WaitStatus::Signaled(pid, signal, _coredump)) => {
                         eprintln!("Pid: {:?}, Signal: {:?}", pid, signal);
                         128 + signal as i32

@@ -7,6 +7,8 @@
 
 use super::command::Command;
 use crate::core::ShellCore;
+use nix::{libc, unistd};
+use std::os::fd::RawFd;
 
 pub(crate) struct Pipeline {
     commands: Vec<Command>,
@@ -14,9 +16,34 @@ pub(crate) struct Pipeline {
 }
 
 impl Pipeline {
-    pub(crate) fn exec(&mut self, core: &mut ShellCore) {
-        for command in self.commands.iter_mut() {
-            command.exec(core);
+    pub(crate) fn exec(&self, core: &mut ShellCore) {
+        // Open all the necessary pipes between commands.
+        // Ideally, it would be sufficient to have at least two pipes open to handle the
+        // communication between commands. However, to keep the implementation simple,
+        // I will open all the required pipes.
+        let pipes = Self::create_pipe(self.commands.len() - 1);
+
+        // Execute each command in the pipeline.
+        for (index, command) in self.commands.iter().enumerate() {
+            let rfd: RawFd = if index == 0 {
+                // If the first command, connect stdin to the original stdin.
+                libc::STDIN_FILENO
+            } else {
+                pipes[index - 1].rdf
+            };
+            let wfd: RawFd = if index == self.commands.len() - 1 {
+                // If the last command, connect stdout to the original stdout.
+                libc::STDOUT_FILENO
+            } else {
+                pipes[index].wdf
+            };
+
+            command.exec(rfd, wfd, core);
+        }
+
+        // Close all pipes.
+        for pipe in pipes {
+            unistd::close(pipe.rdf).unwrap();
         }
     }
 
@@ -33,5 +60,25 @@ impl Pipeline {
             _text: text,
             commands,
         }
+    }
+}
+
+struct Pipe {
+    rdf: RawFd,
+    wdf: RawFd,
+}
+
+impl Pipeline {
+    fn create_pipe(length: usize) -> Vec<Pipe> {
+        let mut pipes = Vec::new();
+        for _ in 0..length {
+            let pipe = unistd::pipe().unwrap();
+            let pipe = Pipe {
+                rdf: pipe.0,
+                wdf: pipe.1,
+            };
+            pipes.push(pipe);
+        }
+        pipes
     }
 }
