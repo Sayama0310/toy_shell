@@ -29,8 +29,7 @@ fn main() {
                 process::exit(core.pre_status);
             }
             Err(_) => {
-                // TODO: Handle error
-                eprintln!("Error");
+                eprintln!("ToySh: Failed to read line.");
                 break;
             }
         }
