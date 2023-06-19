@@ -1,9 +1,9 @@
-// <script> ::= <job> | <job> <job_separator> <script>
-// <job_separator> ::= "&" | ";" | "\n"
-// <job> ::= <pipeline> | <pipeline> <pipe_separator> <job>
+// <script>         ::= <job> | <job> <job_separator> <script>
+// <job_separator>  ::= "&" | ";" | "\n"
+// <job>            ::= <pipeline> | <pipeline> <pipe_separator> <job>
 // <pipe_separator> ::= "||" | "&&"
-// <pipeline> ::= <simple_command> | <simple_command> <pipe> <pipeline>
-// <pipe> ::= "|"
+// <pipeline>       ::= <simple_command> | <simple_command> <pipe> <pipeline>
+// <pipe>           ::= "|"
 
 use super::pipeline::Pipeline;
 use crate::core::ShellCore;
