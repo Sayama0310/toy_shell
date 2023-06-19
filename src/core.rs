@@ -1,4 +1,7 @@
 use crate::core::command::Command;
+use nix::sys::wait;
+use nix::sys::wait::WaitStatus;
+use nix::unistd::Pid;
 use std::collections::HashMap;
 
 mod builtins;
@@ -23,6 +26,13 @@ impl ShellCore {
         self.pre_status = status;
     }
 
+    fn setting_vars(&mut self) {
+        self.vars
+            .insert("TOYSH_HOME".to_string(), ".toysh".to_string());
+        self.vars
+            .insert("HISTORY_FILE".to_string(), "history".to_string());
+    }
+
     fn run_builtin(&mut self, command: &Command) -> bool {
         let name = command.name.to_str().expect("Conversion to &str failed.");
         if !self.builtins.contains_key(name) {
@@ -33,6 +43,24 @@ impl ShellCore {
         let status = func(self, &command.args);
         self.set_status(status);
         true
+    }
+
+    fn wait_child(&mut self, child: Pid) {
+        let exit_status = match wait::waitpid(child, None) {
+            Ok(WaitStatus::Exited(_pid, status)) => status,
+            Ok(WaitStatus::Signaled(pid, signal, _coredump)) => {
+                eprintln!("Pid: {:?}, Signal: {:?}", pid, signal);
+                128 + signal as i32
+            }
+            Ok(unsupported) => {
+                eprintln!("Unsupported: {:?}", unsupported);
+                1
+            }
+            Err(err) => {
+                panic!("Error: {:?}", err);
+            }
+        };
+        self.set_status(exit_status);
     }
 }
 
@@ -51,12 +79,5 @@ impl ShellCore {
         core.setting_vars();
 
         core
-    }
-
-    fn setting_vars(&mut self) {
-        self.vars
-            .insert("TOYSH_HOME".to_string(), ".toysh".to_string());
-        self.vars
-            .insert("HISTORY_FILE".to_string(), "history".to_string());
     }
 }

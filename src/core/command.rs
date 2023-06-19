@@ -5,12 +5,11 @@
 // <pipeline> ::= <simple_command> | <simple_command> <pipe> <pipeline>
 // <pipe> ::= "|"
 
+use crate::core::pipeline::Pipe;
 use crate::core::ShellCore;
 use crate::reset_signals;
 use nix::errno::Errno;
-use nix::sys::wait;
-use nix::sys::wait::WaitStatus;
-use nix::unistd::ForkResult;
+use nix::unistd::{ForkResult, Pid};
 use nix::{libc, unistd};
 use std::ffi::CString;
 use std::os::fd::RawFd;
@@ -23,9 +22,16 @@ pub(crate) struct Command {
 }
 
 impl Command {
-    pub(crate) fn exec(&self, rfd: RawFd, wfd: RawFd, core: &mut ShellCore) {
+    pub(crate) fn exec(
+        &self,
+        rfd: RawFd,
+        wfd: RawFd,
+        core: &mut ShellCore,
+        all_pipes: Vec<Pipe>,
+    ) -> Option<Pid> {
         if core.run_builtin(self) {
-            return;
+            eprintln!("ToySh: Built-in command does not support piping.");
+            return None;
         }
         match unsafe { unistd::fork() } {
             Ok(ForkResult::Child) => {
@@ -33,6 +39,11 @@ impl Command {
                 // Set STDIN and STDOUT to rfd and wfd, respectively.
                 unistd::dup2(rfd, libc::STDIN_FILENO).unwrap();
                 unistd::dup2(wfd, libc::STDOUT_FILENO).unwrap();
+                // Close all the pipes.
+                for pipe in all_pipes {
+                    unistd::close(pipe.rfd).unwrap();
+                    unistd::close(pipe.wfd).unwrap();
+                }
                 match unistd::execvp(&self.name, &self.cargs) {
                     Err(Errno::EACCES) => {
                         eprintln!("{}: Permission denied", self.name.to_str().unwrap());
@@ -46,38 +57,16 @@ impl Command {
                         eprintln!("Failed to execute. {:?}", err);
                         process::exit(127)
                     }
-                    _ => (),
+                    _ => unreachable!("execvp should not return Ok(_)"),
                 }
             }
-            Ok(ForkResult::Parent { child }) => {
-                let exit_status = match wait::waitpid(child, None) {
-                    Ok(WaitStatus::Exited(_pid, status)) => {
-                        // Close wfd.
-                        // Without this step, the subsequent command (such as `cat -n`) would not
-                        // know when to finish, resulting in an indefinite execution.
-                        if wfd != libc::STDOUT_FILENO {
-                            unistd::close(wfd).unwrap();
-                        }
-                        status
-                    }
-                    Ok(WaitStatus::Signaled(pid, signal, _coredump)) => {
-                        eprintln!("Pid: {:?}, Signal: {:?}", pid, signal);
-                        128 + signal as i32
-                    }
-                    Ok(unsupported) => {
-                        eprintln!("Unsupported: {:?}", unsupported);
-                        1
-                    }
-                    Err(err) => {
-                        panic!("Error: {:?}", err);
-                    }
-                };
-                core.set_status(exit_status);
-            }
+            Ok(ForkResult::Parent { child }) => Some(child),
             Err(err) => panic!("Failed to fork. {}", err),
         }
     }
+}
 
+impl Command {
     pub(crate) fn parse(line: &str, _core: &mut ShellCore) -> Command {
         let tokens = line.split_whitespace();
         let args: Vec<String> = tokens.map(|s| s.to_string()).collect();
