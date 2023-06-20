@@ -1,4 +1,5 @@
 use crate::core::ShellCore;
+use nix::{libc, unistd};
 use std::path::PathBuf;
 use std::{env, fs, process};
 
@@ -66,4 +67,23 @@ pub fn cd(core: &mut ShellCore, args: &Vec<String>) -> i32 {
         eprintln!("Not exist directory :{}", path.display());
         1
     }
+}
+
+pub fn toyenv(core: &mut ShellCore, args: &Vec<String>) -> i32 {
+    if args.len() == 1 {
+        // Print all environment variables
+        for (key, val) in &core.vars {
+            unistd::write(libc::STDOUT_FILENO, format!("{}={}\n", key, val).as_bytes()).unwrap();
+        }
+    }
+    for arg in &args[1..] {
+        // Print environment variable
+        if let Some(val) = core.vars.get(arg) {
+            unistd::write(libc::STDOUT_FILENO, format!("{}={}\n", arg, val).as_bytes()).unwrap();
+        } else {
+            eprintln!("{}: Undefined variable", arg);
+            return 1;
+        }
+    }
+    0
 }

@@ -3,6 +3,7 @@ use nix::sys::wait;
 use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
 use std::collections::HashMap;
+use std::env;
 
 mod builtins;
 mod command;
@@ -31,6 +32,11 @@ impl ShellCore {
             .insert("TOYSH_HOME".to_string(), ".toysh".to_string());
         self.vars
             .insert("HISTORY_FILE".to_string(), "history".to_string());
+        self.vars.insert("OLDPWD".to_string(), "".to_string());
+        if let Ok(current_path) = env::current_dir() {
+            self.vars
+                .insert("PWD".to_string(), current_path.display().to_string());
+        };
     }
 
     fn run_builtin(&mut self, command: &Command) -> bool {
@@ -74,6 +80,7 @@ impl ShellCore {
         // Setting up the processing of the built-in commands.
         core.builtins.insert("exit".to_string(), builtins::exit);
         core.builtins.insert("cd".to_string(), builtins::cd);
+        core.builtins.insert("toyenv".to_string(), builtins::toyenv);
 
         // Setting up the environment variables.
         core.setting_vars();
