@@ -62,6 +62,7 @@ pub fn cd(core: &mut ShellCore, args: &Vec<String>) -> i32 {
             core.vars
                 .insert("PWD".to_string(), full.display().to_string());
         }
+        unistd::write(libc::STDOUT_FILENO, path.display().to_string().as_bytes()).unwrap();
         0
     } else {
         eprintln!("Not exist directory :{}", path.display());
