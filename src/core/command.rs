@@ -29,8 +29,24 @@ impl Command {
         core: &mut ShellCore,
         all_pipes: Vec<Pipe>,
     ) -> Option<Pid> {
-        if core.run_builtin(self) {
-            eprintln!("ToySh: Built-in command does not support piping.");
+        if core.is_builtin(&self.name) {
+            // FIXME: I'm not sure if this is the cause, but when executing a command like `ls | toyenv | cat -n`, the error "ls: stdout: Broken pipe" is displayed.
+            // If the command is a built-in command, execute it and return None.
+            // Open a temporary pipe to redirect the output of the built-in command.
+            let (tmp_rfd, tmp_wfd) = unistd::pipe().unwrap();
+            unistd::dup2(libc::STDIN_FILENO, tmp_rfd).unwrap();
+            unistd::dup2(libc::STDOUT_FILENO, tmp_wfd).unwrap();
+            // Set STDIN and STDOUT to rfd and wfd, respectively.
+            unistd::dup2(rfd, libc::STDIN_FILENO).unwrap();
+            unistd::dup2(wfd, libc::STDOUT_FILENO).unwrap();
+            // Execute the built-in command.
+            core.run_builtin(self);
+            // Reset STDIN and STDOUT to the original ones.
+            unistd::dup2(tmp_rfd, libc::STDIN_FILENO).unwrap();
+            unistd::dup2(tmp_wfd, libc::STDOUT_FILENO).unwrap();
+            // Close the temporary pipe.
+            unistd::close(tmp_rfd).unwrap();
+            unistd::close(tmp_wfd).unwrap();
             return None;
         }
         match unsafe { unistd::fork() } {

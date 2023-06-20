@@ -4,6 +4,7 @@ use nix::sys::wait::WaitStatus;
 use nix::unistd::Pid;
 use std::collections::HashMap;
 use std::env;
+use std::ffi::CString;
 
 mod builtins;
 mod command;
@@ -67,6 +68,12 @@ impl ShellCore {
             }
         };
         self.set_status(exit_status);
+    }
+
+    pub(crate) fn is_builtin(&self, filename: &CString) -> bool {
+        // Check if the command is a built-in command.
+        let name = filename.to_str().expect("Conversion to &str failed.");
+        self.builtins.contains_key(name)
     }
 }
 
