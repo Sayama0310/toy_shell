@@ -46,22 +46,22 @@ impl Command {
                 }
                 match unistd::execvp(&self.name, &self.cargs) {
                     Err(Errno::EACCES) => {
-                        eprintln!("{}: Permission denied", self.name.to_str().unwrap());
+                        eprintln!("ToySh: {}: Permission denied", self.name.to_str().unwrap());
                         process::exit(126)
                     }
                     Err(Errno::ENOENT) => {
-                        eprintln!("{}: command not found", self.name.to_str().unwrap());
+                        eprintln!("ToySh: {}: command not found", self.name.to_str().unwrap());
                         process::exit(127)
                     }
                     Err(err) => {
-                        eprintln!("Failed to execute. {:?}", err);
+                        eprintln!("ToySh: Failed to execute. {:?}", err);
                         process::exit(127)
                     }
-                    _ => unreachable!("execvp should not return Ok(_)"),
+                    _ => unreachable!("ToySh: execvp should not return Ok(_)"),
                 }
             }
             Ok(ForkResult::Parent { child }) => Some(child),
-            Err(err) => panic!("Failed to fork. {}", err),
+            Err(err) => panic!("ToySh: Failed to fork. {}", err),
         }
     }
 }
